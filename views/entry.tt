@@ -1,0 +1,15 @@
+    <% IF entry %>
+    <div id="sidebar">
+        <h1>Posted at</h1>
+        <p><% entry.created_at | html_entity %></p>
+        <h1>Summary</h1>
+        <p><% entry.summary | html_entity %></p>
+    </div>
+    <div id="content">
+        <h2><% entry.title | html_entity %></h2>
+        <p><% entry.content | html_entity %></p>
+    <% ELSE %>
+        <p>Invalid entry.</p>
+    <% END %>
+    </div>
+
