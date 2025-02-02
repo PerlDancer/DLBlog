@@ -9,17 +9,11 @@ use Feature::Compat::Try;
 
 Running list of updates to the tutorial
 
-    cpanm Dancer2::Plugin::DBIx::Class \
-        DBIx::Class::Schema::Loader \
-        DateTime::Format::SQLite \
+    cpanm \
         Dancer2::Plugin::Auth::Tiny \
         Dancer2::Plugin::CryptPassphrase
 
 Then add those to cpanfile
-
-    dbicdump -o dump_directory=./lib \
-        -o components='["InflateColumn::DateTime"]' \
-        DLBlog::Schema dbi:SQLite:db/dlblog.db '{ quote_char => "\"" }'
 
 Create users:
 
@@ -31,33 +25,16 @@ Then rerun:
         -o components='["InflateColumn::DateTime"]' \
         DLBlog::Schema dbi:SQLite:db/dlblog.db '{ quote_char => "\"" }'
 
-Explain that changes to POST /create results in more succinct code thats
-easier to follow, but not well suited to production.
-Can add better error handling, validation, retries, etc.
-
 Explain that Auth::Tiny has other features, but we configured it
 minimally.
 
 Use sessions in auth only.
 
-TODO: Paginate results
+TODO: README
 
 Create a new password:
 
     perl -MCrypt::Passphrase -E'my $auth=Crypt::Passphrase->new(encoder=>"Argon2"); say $auth->hash_password("test")'
-
-Sawyer's version, for reference:
-
-    post '/create' => sub {
-        my $params = body_parameters();
-        my @missing = grep $params->{$_}, qw< title summary content >;
-        @missing and redirect '/create?missing=' . join ",", @missing;
-        if ( schema->..->create->...() ) {
-            return template 'great';
-        }
-
-        redirect '/create?error=...'
-    }
 
 =cut
 
@@ -98,10 +75,12 @@ post '/create' => needs login => sub {
         }
         catch( $e ) {
             error "Database error: $e";
-            var error_message => $e,
+            var error_message => 'A database error occurred; your entry could not be created',
             forward '/create', {}, { method => 'GET' };
         }
     };
+
+    debug 'Created entry ' . $entry->id . ' for "' . $entry->title . '"';
     redirect uri_for "/entry/" . $entry->id; # redirect does not need a return
 };
 
