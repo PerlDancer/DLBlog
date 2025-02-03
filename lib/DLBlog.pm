@@ -91,7 +91,7 @@ get '/update/:id[Int]' => needs login => sub {
     template 'create_update', { post_to => uri_for "/update/$id", page_title => "Edit Entry $id" };
 };
 
-post '/update/:id' => needs login => sub {
+post '/update/:id[Int]' => needs login => sub {
     my $id = route_parameters->get('id');
     my $entry = resultset( 'Entry' )->find( $id );
     if( !$entry ) {
@@ -113,9 +113,11 @@ post '/update/:id' => needs login => sub {
     }
     catch( $e ) {
         error "Database error: $e";
-        var error_message => $e,
+        var error_message => 'A database error occurred; your entry could not be updated',
         forward "/update/$id", {}, { method => 'GET' };
     }
+
+    debug 'Updated entry ' . $entry->id . ' for "' . $entry->title . '"';
     redirect uri_for "/entry/" . $entry->id; # redirect does not need a return
 };
 

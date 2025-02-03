@@ -1,4 +1,4 @@
-    <div id="create">
+    <div id="create_update">
         <form method="post" action="<% post_to %>">
             <div class="mb-3">
                 <label for="title" class="form-label">Title</label>
