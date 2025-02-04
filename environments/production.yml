@@ -1,7 +1,7 @@
 # configuration file for production environment
 
-# only log warning and error messsages
-log: "warning"
+# only log info, warning and error messsages
+log: "info"
 
 # log message to a file in logs/
 logger: "file"
@@ -11,3 +11,17 @@ show_stacktrace: 0
 
 # disable server tokens in production environments
 no_server_tokens: 1
+
+# Plugin configuration
+plugins:
+  DBIx::Class:
+    default:
+      dsn: "dbi:SQLite:dbname=db/dlblog.db"
+      schema_class: "DLBlog::Schema"
+      dbi_params:
+        RaiseError: 1
+        AutoCommit: 1
+  CryptPassphrase:
+    encoder:
+      module: Argon2
+      parallelism: 2
