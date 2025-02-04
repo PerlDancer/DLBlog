@@ -1,4 +1,11 @@
 requires "Dancer2" => "1.1.0";
+requires "DBD::SQLite";
+requires "Dancer2::Plugin::DBIx::Class";
+requires "DBIx::Class::Schema::Loader";
+requires "DateTime::Format::SQLite";
+requires "Feature::Compat::Try";
+requires "Dancer2::Plugin::CryptPassphrase";
+requires "Dancer2::Plugin::Auth::Tiny";
 
 recommends "YAML"                    => "0";
 recommends "URL::Encode::XS"         => "0";
