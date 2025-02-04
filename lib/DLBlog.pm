@@ -5,39 +5,6 @@ use Dancer2::Plugin::Auth::Tiny;
 use Dancer2::Plugin::CryptPassphrase;
 use Feature::Compat::Try;
 
-=pod
-
-Running list of updates to the tutorial
-
-    cpanm \
-        Dancer2::Plugin::Auth::Tiny \
-        Dancer2::Plugin::CryptPassphrase
-
-Then add those to cpanfile
-
-Create users:
-
-    sqlite3 db/dlblog.db < db/users.sql
-
-Then rerun:
-
-    dbicdump -o dump_directory=./lib \
-        -o components='["InflateColumn::DateTime"]' \
-        DLBlog::Schema dbi:SQLite:db/dlblog.db '{ quote_char => "\"" }'
-
-Explain that Auth::Tiny has other features, but we configured it
-minimally.
-
-Use sessions in auth only.
-
-TODO: README
-
-Create a new password:
-
-    perl -MCrypt::Passphrase -E'my $auth=Crypt::Passphrase->new(encoder=>"Argon2"); say $auth->hash_password("test")'
-
-=cut
-
 get '/' => sub {
     # Give us the most recent first
     my @entries = resultset('Entry')->search(
@@ -50,12 +17,12 @@ get '/' => sub {
 get '/entry/:id[Int]' => sub {
     my $id = route_parameters->get('id');
     my $entry = resultset( 'Entry' )->find( $id );
-    template 'entry', { entry => $entry, page_title => $entry->title };
+    template 'entry', { entry => $entry };
 };
 
 get '/create' => needs login => sub {
     # Vars are passed to templates automatically
-    template 'create_update', { post_to => uri_for '/create', page_title => 'Create Entry' };
+    template 'create_update', { post_to => uri_for '/create' };
 };
 
 post '/create' => needs login => sub {
@@ -88,7 +55,7 @@ get '/update/:id[Int]' => needs login => sub {
     my $id = route_parameters->get('id');
     my $entry = resultset( 'Entry' )->find( $id );
     var $_ => $entry->$_ foreach qw< title summary content >;
-    template 'create_update', { post_to => uri_for "/update/$id", page_title => "Edit Entry $id" };
+    template 'create_update', { post_to => uri_for "/update/$id" };
 };
 
 post '/update/:id[Int]' => needs login => sub {
@@ -121,13 +88,13 @@ post '/update/:id[Int]' => needs login => sub {
     redirect uri_for "/entry/" . $entry->id; # redirect does not need a return
 };
 
-get '/delete/:id' => needs login => sub {
+get '/delete/:id[Int]' => needs login => sub {
     my $id = route_parameters->get('id');
     my $entry = resultset( 'Entry' )->find( $id );
-    template 'delete', { entry => $entry, page_title => "Delete Entry $id" };
+    template 'delete', { entry => $entry };
 };
 
-post '/delete/:id' => needs login => sub {
+post '/delete/:id[Int]' => needs login => sub {
     my $id = route_parameters->get('id');
     my $entry = resultset( 'Entry' )->find( $id );
     if( !$entry ) {
@@ -148,7 +115,7 @@ post '/delete/:id' => needs login => sub {
 };
 
 get '/login' => sub {
-    template 'login' => { return_url => params->{ return_url }, page_title => 'Login' };
+    template 'login' => { return_url => params->{ return_url } };
 };
 
 post '/login' => sub {
@@ -158,8 +125,8 @@ post '/login' => sub {
 
     my $user = resultset( 'User' )->find({ username => $username });
     if ( $user and verify_password( $password, $user->password) ) {
-        session user => $username;
         app->change_session_id;
+        session user => $username;
         info "$username successfully logged in";
         return redirect $return_url || '/';
     }
@@ -172,11 +139,6 @@ post '/login' => sub {
 get '/logout' => sub {
     app->destroy_session;
     redirect uri_for "/";
-};
-
-hook before_layout_render => sub {
-    my ($tokens, $ref_content) = @_;
-    $tokens->{ page_title } = 'Welcome!' unless $tokens->{ page_title };
 };
 
 true;
