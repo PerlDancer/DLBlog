@@ -6,6 +6,8 @@ requires "DateTime::Format::SQLite";
 requires "Feature::Compat::Try";
 requires "Dancer2::Plugin::CryptPassphrase";
 requires "Dancer2::Plugin::Auth::Tiny";
+requires "Starman";
+requires "Server::Starter";
 
 recommends "YAML"                    => "0";
 recommends "URL::Encode::XS"         => "0";
